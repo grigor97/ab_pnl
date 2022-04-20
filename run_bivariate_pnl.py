@@ -26,12 +26,14 @@ def main(args):
     noise = data['noise']
 
     median_loss, losses = get_final_median_loss(df, batch_size, lamb, num_epochs, num_trials)
+
+    median_loss_back, losses_back = get_final_median_loss(df[['x2', 'x1']], batch_size, lamb, num_epochs, num_trials)
+
     print('direction ->')
     print(median_loss)
     print(losses)
-
+    
     print('direction <- ')
-    median_loss_back, losses_back = get_final_median_loss(df[['x2', 'x1']], num_trials)
     print(median_loss_back)
     print(losses_back)
 
