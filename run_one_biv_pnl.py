@@ -25,22 +25,28 @@ def main(args):
     df = (df - df.mean()) / df.std()
     noise = data['noise']
 
-    median_loss, losses = get_final_median_loss(df, batch_size, lamb, num_epochs, num_trials)
+    input_dim = df.shape[1] - 1
 
-    median_loss_back, losses_back = get_final_median_loss(df[['x2', 'x1']], batch_size, lamb, num_epochs, num_trials)
+    train, test = train_test_split(df, test_size=0.1, random_state=10, shuffle=True)
 
-    print('direction ->')
-    print(median_loss)
-    print(losses)
+    train = np.array(train)
+    test = np.array(test)
 
-    print('direction <- ')
-    print(median_loss_back)
-    print(losses_back)
+    train = MyDataset(train)
+    test = MyDataset(test)
 
-    if median_loss_back > median_loss:
-        print("estimated direction is ->")
-    else:
-        print("estimated direction is <-")
+    train_loader = DataLoader(train, batch_size=batch_size, shuffle=True,
+                              num_workers=0, pin_memory=True)
+    test_loader = DataLoader(test, batch_size=batch_size, shuffle=False,
+                             num_workers=0, pin_memory=True)
+
+    train_loss_avgs, test_loss_avgs, min_loss = train_model(train_loader, test_loader,
+                                                            lamb, num_epochs, input_dim)
+
+    plot_abpnl_bivariate_losses(train_loss_avgs, test_loss_avgs)
+
+    print('min loss')
+    print(min_loss)
 
 
 if __name__ == '__main__':

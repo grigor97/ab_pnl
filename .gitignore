@@ -1,3 +1,7 @@
 .DS_Store
 .idea
 src/notebooks/.ipynb_checkpoints/
+utils/__pycache__
+src/models/__pycache_
+src/.DS_Store
+_
