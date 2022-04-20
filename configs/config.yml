@@ -1,0 +1,8 @@
+params:
+  n: 1000
+  
+  batch_size: 32
+  lamb: 0.5
+  num_epochs: 200
+
+  num_trials: 9
