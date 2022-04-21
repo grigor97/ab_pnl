@@ -1,3 +1,5 @@
+import numpy as np
+
 from src.data_generation.simulate_pnl_data import *
 from src.models.hsic import *
 
@@ -50,7 +52,7 @@ class Network(nn.Module):
             nn.LeakyReLU(),
             nn.Linear(5, 5),
             nn.LeakyReLU(),
-            nn.Linear(5, 1) # or 5?
+            nn.Linear(5, 1)
             #             nn.LeakyReLU()
         )
         self.decode = nn.Sequential(
@@ -264,3 +266,75 @@ def train_mult_model(train_loader, test_loader, lamb, num_epochs, input_dim, log
 
     return train_loss_avgs, test_loss_avgs, min_loss
 
+
+def get_final_median_loss_mult(train, test, batch_size, input_dim, lamb, num_epochs, num_trials):
+    train = MyDataset(train)
+    test = MyDataset(test)
+
+    train_loader = DataLoader(train, batch_size=batch_size, shuffle=True,
+                              num_workers=0, pin_memory=True)
+    test_loader = DataLoader(test, batch_size=batch_size, shuffle=False,
+                             num_workers=0, pin_memory=True)
+
+    losses = []
+    for trial in range(num_trials):
+        train_loss_avgs, test_loss_avgs, min_loss = train_mult_model(train_loader, test_loader,
+                                                                     lamb, num_epochs, input_dim)
+        losses.append(min_loss)
+
+    median_loss = np.median(losses)
+    return median_loss, losses
+
+
+def get_sink_node_mult(X_val, batch_size, lamb, num_epochs, num_trials):
+    rand_seed = np.random.randint(0, 1000000)
+    random.seed(rand_seed)
+    np.random.seed(rand_seed)
+    torch.manual_seed(rand_seed)
+
+    input_dim = X_val.shape[1] - 1
+
+    train, test = train_test_split(X_val, test_size=0.5, random_state=10, shuffle=True)
+
+    median_loss, losses = get_final_median_loss_mult(train, test, batch_size,
+                                                     input_dim, lamb, num_epochs,
+                                                     num_trials)
+    min_loss = median_loss
+    last_node = input_dim
+    for j in range(input_dim):
+        print("node ", j)
+        train.T[[j, input_dim]] = train.T[[input_dim, j]]
+        test.T[[j, input_dim]] = test.T[[input_dim, j]]
+        median_loss, losses = get_final_median_loss_mult(train, test, batch_size,
+                                                         input_dim, lamb, num_epochs,
+                                                         num_trials)
+
+        if median_loss < min_loss:
+            min_loss = median_loss
+            last_node = j
+
+    return last_node, min_loss
+
+
+def get_order_mult(X_vals, batch_size, lamb, num_epochs, num_trials):
+    order = []
+    remained = list(range(X_vals.shape[1]))
+    X = X_vals
+    while True:
+        print(order)
+        last_node_index, min_loss = get_sink_node_mult(X, batch_size, lamb, num_epochs, num_trials)
+        print(last_node_index)
+        print(remained)
+        last_node = remained[last_node_index]
+        order.append(last_node+1)
+
+        remained.remove(last_node)
+        print(remained)
+
+        if len(remained) == 1:
+            order.append(remained[0]+1)
+            break
+
+        X = X_vals.T[remained].T
+
+    return order[::-1]
