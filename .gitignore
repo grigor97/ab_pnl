@@ -5,4 +5,4 @@ utils/__pycache__
 src/models/__pycache_
 src/.DS_Store
 src/models/__pycache__/
-_
+src/data_generation/__pycache__/

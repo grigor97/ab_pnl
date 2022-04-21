@@ -6,3 +6,7 @@ params:
   num_epochs: 200
 
   num_trials: 9
+
+mult_params:
+  n: 2000
+  d: 4

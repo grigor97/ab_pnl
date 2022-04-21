@@ -21,8 +21,8 @@ def load_cfg(yaml_file_path):
 
 def plot_abpnl_bivariate_losses(train_loss_avgs, test_loss_avgs):
     fig, ax = plt.subplots(1, 1, figsize=(12, 8))
-    ax.plot(train_loss_avgs, label='train')
-    ax.plot(test_loss_avgs, label='test')
+    ax.plot(train_loss_avgs[50:], label='train')
+    ax.plot(test_loss_avgs[50:], label='test')
     ax.legend()
 
     plt.savefig('train_test_loss.png')
@@ -49,5 +49,5 @@ def plot_graph_from_adj_matrix(A):
     G.add_edges_from(edges)
     pos = graphviz_layout(G, prog='dot')
     nx.draw(G, pos, node_size=2000, labels=labels, with_labels=True)
-    plt.show()
-
+    plt.savefig('generated_causal_graph.png')
+    # plt.show()
