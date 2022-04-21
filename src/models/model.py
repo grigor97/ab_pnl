@@ -9,8 +9,6 @@ from sklearn.model_selection import train_test_split
 import random
 
 
-
-
 class MyDataset(Dataset):
     def __init__(self, data):
         self.data = data
