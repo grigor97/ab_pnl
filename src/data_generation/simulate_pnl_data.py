@@ -39,7 +39,7 @@ def simulate_multivariate_abpnl(n: int, d: int):
     # means something is not correct in the paper. I think it should be just sigmoid
     # FIXME normalize
     def f2(z):
-        return 1 / (1 + np.exp(-x))
+        return 1 / (1 + np.exp(-z))
 
     A = gen_directed_erdos_reyni_graph(d)
 
